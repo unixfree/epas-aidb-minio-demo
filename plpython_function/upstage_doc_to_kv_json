@@ -1,0 +1,35 @@
+CREATE OR REPLACE FUNCTION upstage_doc_to_kv_json(bin_image BINARY, name string, mime string)
+RETURNS JSONB AS $$
+
+import requests
+import json
+import os
+
+api_key = "YOUR_UPSTAGE_API_KEY"  # ex: up_xxxYYYzzzAAAbbbCCC
+#file_path = "YOUR_FILE_NAME"  # ex: ./document.pdf
+ 
+url = "https://api.upstage.ai/v1/document-digitization"
+headers = {"Authorization": f"Bearer {api_key}"}
+
+files_to_upload = {
+      'document': (name, bin_image, mime)
+}
+#files = {"document": open(file_path, "rb")}
+
+data = {
+    "model": "document-parse-250618",
+    "ocr": "auto",
+    "chart_recognition": True,
+    "coordinates": True,
+#    "output_formats": '["html","text"]',
+    "output_formats": '["html"]',
+    "base64_encoding": '["figure"]',
+}
+
+response = requests.post(url, headers=headers, files=files_to_upload, data=data)
+ 
+#print(response.json())
+
+return json.dumps(response.json())
+
+$$ LANGUAGE plpython3u;
